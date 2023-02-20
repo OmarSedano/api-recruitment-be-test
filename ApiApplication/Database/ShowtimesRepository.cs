@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace ApiApplication.Database
 {
@@ -33,9 +35,12 @@ namespace ApiApplication.Database
             return GetCollection(null);
         }
 
-        public IEnumerable<ShowtimeEntity> GetCollection(Func<IQueryable<ShowtimeEntity>, bool> filter)
+        //Could not figure out how to make it work with Func<IQueryable<ShowtimeEntity>, bool> filter :( and used an alternative instead
+        public IEnumerable<ShowtimeEntity> GetCollection(Expression<Func<ShowtimeEntity, bool>> filter)
         {
-            throw new System.NotImplementedException();
+            return filter == null
+                ? _context.Showtimes.Include(x => x.Movie)
+                : _context.Showtimes.Where(filter).Include(x => x.Movie);
         }
 
         public ShowtimeEntity Update(ShowtimeEntity showtimeEntity)
