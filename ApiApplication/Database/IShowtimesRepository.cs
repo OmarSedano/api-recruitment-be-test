@@ -13,6 +13,6 @@ namespace ApiApplication.Database
         ShowtimeEntity GetByMovie(Func<IQueryable<MovieEntity>, bool> filter);
         ShowtimeEntity Add(ShowtimeEntity showtimeEntity);
         ShowtimeEntity Update(ShowtimeEntity showtimeEntity);
-        ShowtimeEntity Delete(int id);
+        void Delete(int id);
     }
 }
