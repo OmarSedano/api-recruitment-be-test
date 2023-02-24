@@ -50,7 +50,7 @@ namespace ApiApplication.Controllers
                 throw new ArgumentNullException("showTime > Movie > Imdb can not be null");
             }
 
-            //TODO: Move to IConfiguration service. read from appsettings
+            //TODO: Move to ImdbService
             var apiLib = new ApiLib("k_ecm9jl9u");
             var titleData = await apiLib.TitleAsync(showTime.Movie.ImdbId);
 
@@ -95,7 +95,7 @@ namespace ApiApplication.Controllers
             throw new NotImplementedException();
         }
 
-        //TODO: Move to a Service
+        //TODO: Move to ImdbService
         private async Task<Showtime> UpdateMovieData(string imdbId, Showtime showTime)
         {
             var apiLib = new ApiLib("k_ecm9jl9u");

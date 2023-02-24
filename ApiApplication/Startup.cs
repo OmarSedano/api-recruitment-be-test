@@ -1,6 +1,8 @@
 using ApiApplication.Auth;
 using ApiApplication.Database;
 using ApiApplication.Middleware;
+using ApiApplication.Resources;
+using ApiApplication.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -30,7 +32,10 @@ namespace ApiApplication
                     .ConfigureWarnings(b => b.Ignore(InMemoryEventId.TransactionIgnoredWarning));                
             });
             services.AddTransient<IShowtimesRepository, ShowtimesRepository>();
+            services.AddTransient<IImdbService, ImdbService>();
             services.AddSingleton<ICustomAuthenticationTokenService, CustomAuthenticationTokenService>();
+            services.AddSingleton(new IMDBStatus());
+            services.AddHostedService<ImdbBackgroundService>();
             services.AddAuthentication(options =>
             {
                 options.AddScheme<CustomAuthenticationHandler>(CustomAuthenticationSchemeOptions.AuthenticationScheme, CustomAuthenticationSchemeOptions.AuthenticationScheme);

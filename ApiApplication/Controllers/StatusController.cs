@@ -10,10 +10,17 @@ namespace ApiApplication.Controllers
     [ApiController]
     public class StatusController : ControllerBase
     {
+        private readonly IMDBStatus _imdbStatus;
+
+        public StatusController(IMDBStatus imdbStatus)
+        {
+            _imdbStatus = imdbStatus;
+        }
+
         [HttpGet]
         public IMDBStatus Get()
         {
-            throw new NotImplementedException();
+            return _imdbStatus;
         }
     }
 }
