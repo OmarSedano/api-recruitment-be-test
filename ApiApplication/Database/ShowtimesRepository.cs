@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace ApiApplication.Database
 {
@@ -15,17 +17,35 @@ namespace ApiApplication.Database
 
         public ShowtimeEntity Add(ShowtimeEntity showtimeEntity)
         {
-            throw new System.NotImplementedException();
+            _context.Showtimes.Add(showtimeEntity);
+            _context.SaveChanges();
+            return showtimeEntity;
         }
 
-        public ShowtimeEntity Delete(int id)
+        //Modified to return void
+        public void Delete(int id)
         {
-            throw new System.NotImplementedException();
+            try
+            {
+                var showtimeEntity = new ShowtimeEntity()
+                {
+                    Id = id
+                };
+
+                _context.Entry(showtimeEntity).State = EntityState.Deleted;
+                _context.SaveChanges();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                throw new Exception("Entity does not exist");
+            }
         }
 
-        public ShowtimeEntity GetByMovie(Func<IQueryable<MovieEntity>, bool> filter)
+        //Could not figure out how to make it work with Func<IQueryable<MovieEntity>, bool> filter and used an alternative instead
+        public ShowtimeEntity GetByMovie(Expression<Func<MovieEntity, bool>> filter)
         {
-            throw new System.NotImplementedException();
+            var movie = _context.Movies.Where(filter).FirstOrDefault();
+            return movie != null ? _context.Showtimes.FirstOrDefault(x => x.Id == movie.ShowtimeId) : null;
         }
 
         public IEnumerable<ShowtimeEntity> GetCollection()
@@ -33,14 +53,24 @@ namespace ApiApplication.Database
             return GetCollection(null);
         }
 
-        public IEnumerable<ShowtimeEntity> GetCollection(Func<IQueryable<ShowtimeEntity>, bool> filter)
+        //Could not figure out how to make it work with Func<IQueryable<ShowtimeEntity>, bool> filter and used an alternative instead
+        public IEnumerable<ShowtimeEntity> GetCollection(Expression<Func<ShowtimeEntity, bool>> filter)
         {
-            throw new System.NotImplementedException();
+            return filter == null
+                ? _context.Showtimes.Include(x => x.Movie)
+                : _context.Showtimes.Where(filter).Include(x => x.Movie);
         }
 
-        public ShowtimeEntity Update(ShowtimeEntity showtimeEntity)
+        public ShowtimeEntity Update(ShowtimeEntity updateShowtimeEntity)
         {
-            throw new System.NotImplementedException();
+            var showTimeEntity = _context.Showtimes.Include(x => x.Movie).FirstOrDefault(x => x.Id == updateShowtimeEntity.Id);
+            _context.Entry(showTimeEntity).CurrentValues.SetValues(updateShowtimeEntity);
+            if (updateShowtimeEntity.Movie != null)
+            {
+                showTimeEntity.Movie = updateShowtimeEntity.Movie;
+            }
+            _context.SaveChanges();
+            return updateShowtimeEntity;
         }
     }
 }

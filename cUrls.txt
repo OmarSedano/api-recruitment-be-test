@@ -1,2 +1,44 @@
 Please add the cURLs of your tests here:
 
+## GET
+
+curl --location 'https://localhost:7629/api/showtime' --header 'ApiKey: MTIzNHxSZWFk'
+
+## POST
+
+curl --location 'https://localhost:7629/api/showtime' \
+--header 'Content-Type: application/json' \
+--header 'ApiKey: Nzg5NHxXcml0ZQ==' \
+--data '{
+    "StartDate":"2023-01-01T00:00:00",
+    "EndDate":"2023-03-01T00:00:00",
+    "Schedule": "17:00, 18:00, 19:00, 21:00",
+    "AuditoriumId": 1,
+    "Movie":{
+        "ImdbId": "tt8367814"
+    }
+}'
+
+## PUT
+
+curl --location --request PUT 'https://localhost:7629/api/showtime/1' \
+--header 'Content-Type: application/json' \
+--header 'ApiKey: Nzg5NHxXcml0ZQ==' \
+--data '{
+    "StartDate":"2023-01-01T00:00:00",
+    "EndDate":"2023-03-01T00:00:00",
+    "Schedule": "17:00, 18:00, 19:00, 21:00",
+    "AuditoriumId": 5
+}'
+
+## DELETE
+
+curl --location --request DELETE 'https://localhost:7629/api/showtime/2' --header 'ApiKey: Nzg5NHxXcml0ZQ=='
+
+## PATCH
+
+curl --location --request PATCH 'https://localhost:7629/api/showtime' --header 'ApiKey: Nzg5NHxXcml0ZQ=='
+
+## GET STATUS
+
+curl --location 'https://localhost:7629/api/status'
