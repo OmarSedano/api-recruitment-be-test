@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using ApiApplication.Exceptions;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Net;
 using System.Text.Json;
@@ -28,11 +29,8 @@ namespace ApiApplication.Middleware
 
                 switch (error)
                 {
-                    case NotImplementedException e:
+                    case CustomException e:
                         response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                        break;
-                    case ArgumentNullException e:
-                        response.StatusCode = (int)HttpStatusCode.BadRequest;
                         break;
                     default:
                         // unhandled error

@@ -8,7 +8,11 @@ using ApiApplication.Database;
 using ApiApplication.Database.Entities;
 using ApiApplication.Mappers;
 using System.Linq.Expressions;
+using ApiApplication.Auth;
+using ApiApplication.Services;
 using IMDbApiLib;
+using Microsoft.AspNetCore.Authorization;
+using ApiApplication.Exceptions;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -19,13 +23,16 @@ namespace ApiApplication.Controllers
     public class ShowtimeController : ControllerBase
     {
         private readonly IShowtimesRepository _showtimesRepository;
+        private readonly IImdbService _imdbService;
 
-        public ShowtimeController(IShowtimesRepository showtimesRepository)
+        public ShowtimeController(IShowtimesRepository showtimesRepository, IImdbService imdbService)
         {
             _showtimesRepository = showtimesRepository;
+            _imdbService = imdbService;
         }
 
         //TODO: Change to IActionResult methods
+        [Authorize(Policy = Policies.Read)]
         [HttpGet]
         public IEnumerable<Showtime> Get(DateTime? date, string? title)
         {
@@ -37,6 +44,7 @@ namespace ApiApplication.Controllers
             return showTimes;
         }
 
+        [Authorize(Policy = Policies.Write)]
         [HttpPost]
         public async Task<Showtime> Post([FromBody] Showtime showTime)
         {
@@ -50,20 +58,14 @@ namespace ApiApplication.Controllers
                 throw new ArgumentNullException("showTime > Movie > Imdb can not be null");
             }
 
-            //TODO: Move to ImdbService
-            var apiLib = new ApiLib("k_ecm9jl9u");
-            var titleData = await apiLib.TitleAsync(showTime.Movie.ImdbId);
-
-            showTime.Movie.Stars = titleData.Stars;
-            showTime.Movie.Title = titleData.Title;
-            showTime.Movie.ReleaseDate = DateTime.Parse(titleData.ReleaseDate);
+            showTime = await SetMovieData(showTime);
 
             var newShowTime = ShowTimeMapper.Map(showTime);
             var savedShowTime = _showtimesRepository.Add(newShowTime);
             return ShowTimeMapper.Map(savedShowTime);
         }
 
-
+        [Authorize(Policy = Policies.Write)]
         [HttpPut("{id}")]
         public async Task Put(int id, [FromBody] Showtime showTime)
         {
@@ -76,30 +78,30 @@ namespace ApiApplication.Controllers
 
             if (showTime.Movie != null)
             {
-                showTime = await UpdateMovieData(showTime.Movie.ImdbId, showTime);
+                showTime = await SetMovieData(showTime);
             }
 
             var showtimeEntity = ShowTimeMapper.Map(showTime);
             _showtimesRepository.Update(showtimeEntity);
         }
 
+        [Authorize(Policy = Policies.Write)]
         [HttpDelete("{id}")]
         public void Delete(int id)
         {
             _showtimesRepository.Delete(id);
         }
 
+        [Authorize(Policy = Policies.Write)]
         [HttpPatch]
         public void Patch()
         {
-            throw new NotImplementedException();
+            throw new CustomException();
         }
 
-        //TODO: Move to ImdbService
-        private async Task<Showtime> UpdateMovieData(string imdbId, Showtime showTime)
+        private async Task<Showtime> SetMovieData(Showtime showTime)
         {
-            var apiLib = new ApiLib("k_ecm9jl9u");
-            var titleData = await apiLib.TitleAsync(showTime.Movie.ImdbId);
+            var titleData = await _imdbService.GetTitleDataAsync(showTime.Movie.ImdbId);
 
             showTime.Movie.Stars = titleData.Stars;
             showTime.Movie.Title = titleData.Title;

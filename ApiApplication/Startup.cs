@@ -42,6 +42,13 @@ namespace ApiApplication
                 options.RequireAuthenticatedSignIn = true;                
                 options.DefaultScheme = CustomAuthenticationSchemeOptions.AuthenticationScheme;
             });
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy(Policies.Read,
+                    policy => policy.RequireRole(Roles.Read));
+                options.AddPolicy(Policies.Write,
+                    policy => policy.RequireRole(Roles.Write));
+            });
             services.AddControllers();
         }
 
@@ -62,6 +69,7 @@ namespace ApiApplication
             app.UseAuthentication();
             app.UseAuthorization();
 
+            app.UseApiLogging();
 
             app.UseEndpoints(endpoints =>
             {
