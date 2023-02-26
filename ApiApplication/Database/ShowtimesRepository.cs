@@ -41,9 +41,11 @@ namespace ApiApplication.Database
             }
         }
 
-        public ShowtimeEntity GetByMovie(Func<IQueryable<MovieEntity>, bool> filter)
+        //Could not figure out how to make it work with Func<IQueryable<MovieEntity>, bool> filter and used an alternative instead
+        public ShowtimeEntity GetByMovie(Expression<Func<MovieEntity, bool>> filter)
         {
-            throw new System.NotImplementedException();
+            var movie = _context.Movies.Where(filter).FirstOrDefault();
+            return movie != null ? _context.Showtimes.FirstOrDefault(x => x.Id == movie.ShowtimeId) : null;
         }
 
         public IEnumerable<ShowtimeEntity> GetCollection()
